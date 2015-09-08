@@ -726,12 +726,15 @@ discover_source_dirs(State, ExtraDirs) ->
         case sync_utils:get_src_dir_from_module(X) of
             {ok, SrcDir} ->
                 %% Get the options, store under the dir...
-                {ok, Options} = sync_utils:get_options_from_module(X),
-                %% Store the options for later reference...
-                sync_options:set_options(SrcDir, Options),
-                HrlDir = proplists:get_value(i, Options, []),
-                %% Return the dir...
-                {[SrcDir|SrcAcc], [HrlDir|HrlAcc]};
+                case sync_utils:get_options_from_module(X) of
+                    undefined -> Acc;
+                    {ok, Options} ->
+                        %% Store the options for later reference...
+                        sync_options:set_options(SrcDir, Options),
+                        HrlDir = proplists:get_value(i, Options, []),
+                        %% Return the dir...
+                        {[SrcDir|SrcAcc], [HrlDir|HrlAcc]}
+                end;
             undefined ->
                 Acc
         end
